@@ -68,6 +68,8 @@ bool do_exec(int count, ...)
  *
 */
 
+    fflush(stdout);
+
     int status; pid_t pid;
     pid = fork();
 
@@ -78,6 +80,7 @@ bool do_exec(int count, ...)
     else if (pid == 0)
     {
         execv(command[0], command);
+        va_end(args);
         exit(EXIT_FAILURE);
     }
     
@@ -87,9 +90,12 @@ bool do_exec(int count, ...)
     }
         
 
-    if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
+    if(WIFEXITED(status) && WEXITSTATUS(status) == 0){
+        va_end(args);
 		return true;
+    }
 
+    va_end(args);
     return false;
 }
 
@@ -124,20 +130,48 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 
     int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
     if (fd == -1)
-        return false;
-
-    int ret = dup2(fd, STDOUT_FILENO);
-    if (ret == -1)
     {
-        close(fd);
+        va_end(args);
         return false;
     }
+
+    int pid = fork();
+    switch(pid)
+    {
+        case -1:
+        {
+            va_end(args);
+            close(fd);
+            return false;
+        }
+        case 0:
+        {
+            if (dup2(fd , STDOUT_FILENO) == -1)
+            {
+                va_end(args);
+                close(fd);
+                return false;
+            }
+            execv(command[0], command);
+            va_end(args);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    int status;
+    if (waitpid (pid, &status, 0) == -1){
+        close(fd);
+        va_end(args);
+        return false;
+    }
+        
+    if(WIFEXITED(status) && WEXITSTATUS(status) == 0){
+        close(fd);
+        va_end(args);
+		return true;
+    }
+
     close(fd);
-
-    bool status = do_exec(count, command);
-    
-
     va_end(args);
-
-    return status;
+    return false;
 }
