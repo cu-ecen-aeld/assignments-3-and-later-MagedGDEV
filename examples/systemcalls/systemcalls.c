@@ -154,7 +154,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
             }
             execv(command[0], command);
             va_end(args);
-            exit(EXIT_FAILURE);
+            _exit(EXIT_FAILURE);
         }
     }
 

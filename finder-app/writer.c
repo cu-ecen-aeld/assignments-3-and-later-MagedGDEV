@@ -23,7 +23,9 @@ int main (int argc, char *argv[])
     char* file = argv[1];
     char* string = argv[2];
 
-    fd = open(file, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    // fd = open(file, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    // For assignment 5
+    fd = open(file, O_CREAT | O_WRONLY | O_APPEND, 0644);
 
     if (fd == -1){
         syslog(LOG_ERR, "Can't open, or create file");
