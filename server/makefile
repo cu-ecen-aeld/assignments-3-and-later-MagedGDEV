@@ -17,6 +17,7 @@ systemcalls.o: ../examples/systemcalls/systemcalls.c
 	$(CC) $(CFLAGS) -c ../examples/systemcalls/systemcalls.c
 
 writerApp: writer
+	mkdir -p $(HOME)/bin
 	install -m 744 writer $(HOME)/bin/writer
 
 writer: writer.o
