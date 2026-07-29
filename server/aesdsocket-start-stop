@@ -3,6 +3,7 @@
 case "$1" in
   start)
     echo "Starting simpleserver"
+    export HOME=/root
     start-stop-daemon -S aesdsocket -- -d
     ;;
   stop)
